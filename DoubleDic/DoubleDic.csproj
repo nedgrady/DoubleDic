@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="DoubleDic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SensitiveDictionaryView.cs" />
     <Compile Include="Utilities\Preconditions.cs" />
   </ItemGroup>
   <ItemGroup>
