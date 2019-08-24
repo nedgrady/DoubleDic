@@ -74,7 +74,7 @@ namespace DoubleDic
             internal Enumerator(SensitiveDictionaryView<TKey, TValue> source)
             {
                 _source = source;
-                _enumeratorImplementation = source.GetEnumerator();
+                _enumeratorImplementation = source._dictionaryImplementation.GetEnumerator();
             }
 
             public void Dispose() => _enumeratorImplementation.Dispose();

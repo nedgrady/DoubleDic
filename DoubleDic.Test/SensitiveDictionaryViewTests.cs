@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -198,7 +197,7 @@ namespace DoubleDic.Test
 
             sut.TryGetValue(sensitive, out var value);
 
-            Assert.AreEqual(redacted, sut[sensitive]);
+            Assert.AreEqual(redacted, value);
         }
 
         [TestMethod]
@@ -221,10 +220,69 @@ namespace DoubleDic.Test
 
             sut.TryGetValue(test, out var value);
 
-            Assert.AreEqual(test, sut[test]);
+            Assert.AreEqual(test, value);
         }
 
-        // TODO - Enumeration Tests
+        [TestMethod]
+        public void EnumeratingDictionary_WithNoSensitiveKeys_OutputsSameValues()
+        {
+            const string test = "test";
+            const string sensitive = "sensitive";
+            const string redacted = "redacted";
+
+            var source = new Dictionary<string, string>
+            {
+                [test] = test,
+                [sensitive] = sensitive
+            };
+
+            var sut = new SensitiveDictionaryView<string, string>(
+                source,
+                Enumerable.Empty<string>(),
+                s => redacted);
+
+            using (var sourceIt = source.GetEnumerator())
+            using (var sutIt = sut.GetEnumerator())
+            {
+                while (sourceIt.MoveNext() && sutIt.MoveNext())
+                {
+                    Assert.AreEqual(sutIt.Current, sourceIt.Current);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void EnumeratingDictionary_WithSensitiveKeys_OutputsSensitiveValues()
+        {
+            const string test = "test";
+            const string sensitive = "sensitive";
+            const string redacted = "redacted";
+
+            var source = new Dictionary<string, string>
+            {
+                [test] = test,
+                [sensitive] = sensitive
+            };
+
+            var sut = new SensitiveDictionaryView<string, string>(
+                source,
+                new []{ sensitive },
+                s => redacted);
+
+            sut.TryGetValue(test, out var value);
+
+            using (var sourceIt = source.GetEnumerator())
+            using (var sutIt = sut.GetEnumerator())
+            {
+                while (sourceIt.MoveNext() && sutIt.MoveNext())
+                {
+                    var expected = sourceIt.Current.Key == sensitive ? redacted : test;
+                    var actual = sutIt.Current.Value;
+
+                    Assert.AreEqual(expected, actual);
+                }
+            }
+        }
     }
 
 }
